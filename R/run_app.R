@@ -17,7 +17,14 @@ run_app <- function() {
   # library(shiny)
 
   ## ---- Load data --------------------------------------------------
-  load(system.file("extdata", "all_tabs.Rdata", package = "esbaseShiny"))
+
+  path <- system.file("extdata", "all_tabs.Rdata", package = "esbaseShiny")
+
+  if (nzchar(path)) {
+    load(path)
+  } else {
+    load("/var/lib/esbaseShiny/all_tabs.Rdata")
+  }
 
   ## ---- Theme ------------------------------------------------------
   mytheme <- fresh::create_theme(
