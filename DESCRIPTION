@@ -1,0 +1,35 @@
+Package: esbaseShiny
+Title: ESBase Search and Export Shiny Application
+Version: 0.1.0
+Authors@R:
+    person(
+      given = "Martin",
+      family = "Sköld",
+      role = c("aut", "cre"),
+      email = "martin.skold@nrm.se"
+    )
+Description:
+    A Shiny application for searching, visualising, and exporting
+    environmental specimen data from ESBase, including tables, maps,
+    and interactive plots.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+    shiny,
+    forcats,
+    lubridate,
+    shinydashboard,
+    fresh,
+    DT,
+    plotly,
+    leaflet,
+    shinyjs,
+    dplyr,
+    tidyr,
+    tibble,
+    readr,
+    htmltools,
+    stats
