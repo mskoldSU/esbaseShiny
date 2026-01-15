@@ -44,6 +44,11 @@ run_app <- function() {
     )
   )
 
+  shiny::addResourcePath(
+    prefix = "www",
+    directoryPath = system.file("www", package = "esbaseShiny")
+  )
+
   ## ---- Derived configuration -------------------------------------
   accession_columns <- names(accession_tab)
 

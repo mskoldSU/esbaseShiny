@@ -28,7 +28,7 @@ app_ui <- function(
     dashboardHeader(
       title = shiny::tags$div(
         style = "text-align: center; padding: 0px;",
-        shiny::tags$img(src = "nrm2.png", width = "80px")
+        shiny::tags$img(src = "www/nrm2.png", width = "80px")
       ),
       shiny::tags$li(
         class = "dropdown",

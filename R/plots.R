@@ -45,7 +45,7 @@ plot_xy <- function(df,
       marker = list(opacity = 0.6),
       customdata = df[["url"]],
       hovertemplate = paste0(
-        df[["link"]], "<br>",
+        df[["accnr"]], "<br>",
         "<b>", x, ":</b> %{x}<br>",
         "<b>", y, ":</b> %{y}",
         "<extra></extra>"
