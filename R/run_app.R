@@ -18,12 +18,22 @@ run_app <- function() {
 
   ## ---- Load data --------------------------------------------------
 
-  path <- system.file("extdata", "all_tabs.Rdata", package = "esbaseShiny")
 
-  if (nzchar(path)) {
-    load(path)
-  } else {
-    load("/var/lib/esbaseShiny/all_tabs.Rdata")
+
+  load_esbase_data <- function() {
+    path <- system.file("extdata", "all_tabs.Rdata", package = "esbaseShiny")
+
+    if (!nzchar(path)) {
+      path <- "/var/lib/esbaseShiny/all_tabs.Rdata"
+    }
+
+    e <- new.env(parent = emptyenv())
+    load(path, envir = e)
+
+    list(
+      accession_tab = e$accession_tab,
+      material_tab  = e$material_tab
+    )
   }
 
   ## ---- Theme ------------------------------------------------------
@@ -72,12 +82,14 @@ run_app <- function() {
 
   ## ---- Server -----------------------------------------------------
   server <- function(input, output, session) {
+    dat <- load_esbase_data()
+
     server_app(
-      input        = input,
-      output       = output,
-      session      = session,
-      accession_tab = accession_tab,
-      material_tab  = material_tab
+      input         = input,
+      output        = output,
+      session       = session,
+      accession_tab = dat$accession_tab,
+      material_tab  = dat$material_tab
     )
   }
 
