@@ -60,11 +60,13 @@ run_app <- function() {
   )
 
   ## ---- Derived configuration -------------------------------------
-  accession_columns <- names(accession_tab)
+  tmp <- load_esbase_data()
 
-  material_columns <- names(material_tab)
+  accession_columns <- names(tmp$accession_tab)
 
-  plot_columns <- accession_tab |>
+  material_columns <- names(tmp$material_tab)
+
+  plot_columns <- tmp$accession_tab |>
     dplyr::select(
       dplyr::where(is.numeric) |
         dplyr::where(~ dplyr::n_distinct(.) <= 100) |
