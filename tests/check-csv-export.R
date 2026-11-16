@@ -10,7 +10,6 @@ sample <- data.frame(
 )
 before <- sample
 file <- tempfile(fileext = ".csv")
-on.exit(unlink(file), add = TRUE)
 write_esbase_csv(sample, file)
 
 bytes <- readBin(file, what = "raw", n = file.info(file)$size)
@@ -24,4 +23,5 @@ stopifnot(
   isTRUE(all.equal(result$concentration, sample$concentration)),
   identical(sample, before)
 )
+unlink(file)
 cat("CSV export checks passed\n")
