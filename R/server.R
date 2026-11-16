@@ -81,7 +81,7 @@ server_app <- function(
     filename = function() paste0("ESBase_data_", Sys.Date(), ".csv"),
     content = function(file) {
       idx <- input$acctbl_rows_all
-      readr::write_csv2(acctbl_data()[idx, , drop = FALSE], file)
+      write_esbase_csv(acctbl_data()[idx, , drop = FALSE], file)
     }
   )
 
@@ -89,7 +89,7 @@ server_app <- function(
     filename = function() paste0("ESBase_data_", Sys.Date(), ".csv"),
     content = function(file) {
       idx <- input$mattbl_rows_all
-      readr::write_csv2(mattbl_data()[idx, , drop = FALSE], file)
+      write_esbase_csv(mattbl_data()[idx, , drop = FALSE], file)
     }
   )
 
