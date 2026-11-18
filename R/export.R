@@ -29,3 +29,24 @@ esbase_export_data <- function(data) {
 write_esbase_csv <- function(data, file) {
   readr::write_excel_csv2(esbase_export_data(data), file, na = "")
 }
+
+# Reorder only when the order came from the currently selected DT columns.
+# The browser reports zero-based indices relative to the original R columns.
+reorder_export_columns <- function(data, col_state) {
+  if (is.null(col_state) || is.null(col_state$columns) ||
+      is.null(col_state$order)) {
+    return(data)
+  }
+
+  source_columns <- as.character(unlist(col_state$columns, use.names = FALSE))
+  order <- as.integer(unlist(col_state$order, use.names = FALSE))
+
+  if (!identical(source_columns, names(data)) ||
+      length(order) != ncol(data) ||
+      anyNA(order) ||
+      !identical(sort(order), seq_len(ncol(data)) - 1L)) {
+    return(data)
+  }
+
+  data[, order + 1L, drop = FALSE]
+}

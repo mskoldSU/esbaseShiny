@@ -25,3 +25,38 @@ stopifnot(
 )
 unlink(file)
 cat("CSV export checks passed\n")
+
+# Simulate dragging the fourth column to the second position.
+state <- list(
+  columns = names(sample),
+  order = c(0L, 3L, 1L, 2L)
+)
+reordered <- reorder_export_columns(sample, state)
+stopifnot(
+  identical(names(reordered),
+            names(sample)[c(1L, 4L, 2L, 3L)]),
+  identical(sample, before)
+)
+
+# Exports continue to use the Excel-safe writer after reordering.
+file <- tempfile(fileext = ".csv")
+write_esbase_csv(reordered, file)
+exported <- readr::read_csv2(file, show_col_types = FALSE)
+stopifnot(
+  identical(names(exported), names(reordered)),
+  identical(exported$esbase_id,
+            c("https://example.org/esbase/123", "plain-id"))
+)
+unlink(file)
+
+# Changing selected columns must invalidate the old browser order.
+subset_data <- sample[, c("esbase_id", "species_swe"), drop = FALSE]
+stopifnot(identical(reorder_export_columns(subset_data, state), subset_data))
+
+# Invalid or absent reordering must preserve the input data.
+stopifnot(
+  identical(reorder_export_columns(sample, NULL), sample),
+  identical(reorder_export_columns(sample,
+            list(columns = names(sample), order = c(0L, 1L, 1L, 3L))), sample)
+)
+cat("Column reorder export checks passed\n")
