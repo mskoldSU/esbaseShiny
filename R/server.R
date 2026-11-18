@@ -80,28 +80,56 @@ server_app <- function(
   output$download_acctbl_csv <- downloadHandler(
     filename = function() paste0("ESBase_data_", Sys.Date(), ".csv"),
     content = function(file) {
+      req(input$acctbl_rows_all)
       idx <- input$acctbl_rows_all
-      write_esbase_csv(acctbl_data()[idx, , drop = FALSE], file)
+      data <- acctbl_data()[idx, , drop = FALSE]
+      data <- reorder_export_columns(data, input$acctbl_col_order)
+      write_esbase_csv(data, file)
     }
   )
 
   output$download_mattbl_csv <- downloadHandler(
     filename = function() paste0("ESBase_data_", Sys.Date(), ".csv"),
     content = function(file) {
+      req(input$mattbl_rows_all)
       idx <- input$mattbl_rows_all
-      write_esbase_csv(mattbl_data()[idx, , drop = FALSE], file)
+      data <- mattbl_data()[idx, , drop = FALSE]
+      data <- reorder_export_columns(data, input$mattbl_col_order)
+      write_esbase_csv(data, file)
     }
   )
 
   # ---- Tables -----------------------------------------------------
 
+  # Send both the visual order and the original column names to Shiny.
+  # The names identify the selected-column configuration, preventing stale
+  # reorder events from being applied after columns are added or removed.
+  col_reorder_callback <- function(input_id, column_names) {
+    DT::JS(sprintf("
+      var originalColumns = %s;
+      function sendOrder() {
+        Shiny.setInputValue('%s', {
+          columns: originalColumns,
+          order: table.colReorder.order()
+        }, {priority: 'event'});
+      }
+      table.on('column-reorder.dt', sendOrder);
+      sendOrder();
+    ", jsonlite::toJSON(column_names, auto_unbox = FALSE), input_id))
+  }
+
   output$acctbl <- renderDT(
     datatable(
       acctbl_data(),
+      extensions = "ColReorder",
       filter = "top",
       escape = FALSE,
       selection = "none",
-      options = list(dom = "ftip", pageLength = 25)
+      rownames = FALSE,
+      options = list(dom = "ftip", pageLength = 25, colReorder = TRUE),
+      callback = col_reorder_callback(
+        "acctbl_col_order", names(acctbl_data())
+      )
     ),
     server = TRUE,
     class = "compact stripe hover"
@@ -110,9 +138,15 @@ server_app <- function(
   output$mattbl <- renderDT(
     datatable(
       mattbl_data(),
+      extensions = "ColReorder",
       filter = "top",
       escape = FALSE,
-      selection = "none"
+      selection = "none",
+      rownames = FALSE,
+      options = list(colReorder = TRUE),
+      callback = col_reorder_callback(
+        "mattbl_col_order", names(mattbl_data())
+      )
     ),
     server = TRUE
   )
