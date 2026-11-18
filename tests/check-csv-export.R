@@ -59,4 +59,4 @@ stopifnot(
   identical(reorder_export_columns(sample,
             list(columns = names(sample), order = c(0L, 1L, 1L, 3L))), sample)
 )
-cat("Column reorder export checks passed\\n")
+cat("Column reorder export checks passed\n")
