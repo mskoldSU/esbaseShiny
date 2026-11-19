@@ -60,3 +60,15 @@ stopifnot(
             list(columns = names(sample), order = c(0L, 1L, 1L, 3L))), sample)
 )
 cat("Column reorder export checks passed\n")
+
+# Hiding columns after dragging exports only the visible columns in visual order.
+state$visible <- c(TRUE, FALSE, FALSE, TRUE)
+stopifnot(
+  identical(names(reorder_export_columns(sample, state)),
+            names(sample)[c(1L, 3L)])
+)
+state$visible <- rep(FALSE, ncol(sample))
+stopifnot(ncol(reorder_export_columns(sample, state)) == 0L)
+state$visible <- c(TRUE, FALSE)
+stopifnot(identical(reorder_export_columns(sample, state), sample))
+cat("Column visibility export checks passed\n")

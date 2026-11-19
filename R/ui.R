@@ -63,7 +63,7 @@ app_ui <- function(
 #'
 #' @return A \code{shinydashboard::tabItem}.
 #'
-#' @importFrom shiny fluidRow column selectInput downloadButton br
+#' @importFrom shiny fluidRow column downloadButton br
 #' @importFrom shinydashboard tabItem
 #' @importFrom DT DTOutput
 #'
@@ -76,19 +76,6 @@ ui_materials <- function(material_columns) {
     fluidRow(
       column(
         12,
-
-        selectInput(
-          "material_columns",
-          "Columns",
-          choices = material_columns,
-          selected = c(
-            "esbase_id", "accnr", "discovery_year",
-            "collection_project_name", "species_swe",
-            "locality_name", "material_type",
-            "storage_location", "storage_tray"
-          ),
-          multiple = TRUE
-        ),
 
         DT::DTOutput("mattbl"),
         shiny::br(),
@@ -129,18 +116,6 @@ ui_accessions <- function(accession_columns, plot_columns) {
       # ---- TABLE ---------------------------------------------------
       tabPanel(
         title = "Table",
-
-        selectInput(
-          "accession_columns",
-          "Columns",
-          choices = accession_columns,
-          selected = c(
-            "esbase_id", "accnr", "discovery_year",
-            "collection_project_name",
-            "species_swe", "locality_name"
-          ),
-          multiple = TRUE
-        ),
 
         DT::DTOutput("acctbl"),
         downloadButton("download_acctbl_csv", "Download CSV")

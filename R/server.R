@@ -23,10 +23,15 @@ server_app <- function(
 
   # ---- Reactives --------------------------------------------------
 
-  acctbl_data <- reactive({
-    accession_tab |>
-      dplyr::select(dplyr::all_of(input$accession_columns))
-  })
+  accession_defaults <- c(
+    "esbase_id", "accnr", "discovery_year", "collection_project_name",
+    "species_swe", "locality_name"
+  )
+  material_defaults <- c(
+    accession_defaults, "material_type", "storage_location", "storage_tray"
+  )
+
+  acctbl_data <- reactive(accession_tab)
 
   filtered_accessions <- reactive({
     req(input$acctbl_rows_all)
@@ -65,10 +70,7 @@ server_app <- function(
     )
   })
 
-  mattbl_data <- reactive({
-    material_tab |>
-      dplyr::select(dplyr::all_of(input$material_columns))
-  })
+  mattbl_data <- reactive(material_tab)
 
   summary_data <- reactive({
     req(plot_data())
@@ -83,7 +85,7 @@ server_app <- function(
       req(input$acctbl_rows_all)
       idx <- input$acctbl_rows_all
       data <- acctbl_data()[idx, , drop = FALSE]
-      data <- reorder_export_columns(data, input$acctbl_col_order)
+      data <- export_columns(data, input$acctbl_col_order, accession_defaults)
       write_esbase_csv(data, file)
     }
   )
@@ -94,26 +96,47 @@ server_app <- function(
       req(input$mattbl_rows_all)
       idx <- input$mattbl_rows_all
       data <- mattbl_data()[idx, , drop = FALSE]
-      data <- reorder_export_columns(data, input$mattbl_col_order)
+      data <- export_columns(data, input$mattbl_col_order, material_defaults)
       write_esbase_csv(data, file)
     }
   )
 
   # ---- Tables -----------------------------------------------------
 
-  # Send both the visual order and the original column names to Shiny.
-  # The names identify the selected-column configuration, preventing stale
-  # reorder events from being applied after columns are added or removed.
+  # Use the initial visibility until the browser reports its first state.
+  export_columns <- function(data, state, defaults) {
+    if (is.null(state)) {
+      return(data[, names(data) %in% defaults, drop = FALSE])
+    }
+    reorder_export_columns(data, state)
+  }
+
+  table_options <- function(data, defaults) {
+    list(
+      dom = "Bftip",
+      pageLength = 25,
+      colReorder = TRUE,
+      buttons = list(list(extend = "colvis", text = "Columns")),
+      columnDefs = list(list(
+        targets = which(!names(data) %in% defaults) - 1L,
+        visible = FALSE
+      ))
+    )
+  }
+
+  # Order uses original indices; visibility uses the current visual positions.
+  # Send both together so exports can follow the visible table after dragging.
   col_reorder_callback <- function(input_id, column_names) {
     DT::JS(sprintf("
       var originalColumns = %s;
       function sendOrder() {
         Shiny.setInputValue('%s', {
           columns: originalColumns,
-          order: table.colReorder.order()
+          order: table.colReorder.order(),
+          visible: table.columns().visible().toArray()
         }, {priority: 'event'});
       }
-      table.on('column-reorder.dt', sendOrder);
+      table.on('column-reorder.dt column-visibility.dt', sendOrder);
       sendOrder();
     ", jsonlite::toJSON(column_names, auto_unbox = FALSE), input_id))
   }
@@ -121,12 +144,12 @@ server_app <- function(
   output$acctbl <- renderDT(
     datatable(
       acctbl_data(),
-      extensions = "ColReorder",
+      extensions = c("ColReorder", "Buttons"),
       filter = "top",
       escape = FALSE,
       selection = "none",
       rownames = FALSE,
-      options = list(dom = "ftip", pageLength = 25, colReorder = TRUE),
+      options = table_options(acctbl_data(), accession_defaults),
       callback = col_reorder_callback(
         "acctbl_col_order", names(acctbl_data())
       )
@@ -138,12 +161,12 @@ server_app <- function(
   output$mattbl <- renderDT(
     datatable(
       mattbl_data(),
-      extensions = "ColReorder",
+      extensions = c("ColReorder", "Buttons"),
       filter = "top",
       escape = FALSE,
       selection = "none",
       rownames = FALSE,
-      options = list(colReorder = TRUE),
+      options = table_options(mattbl_data(), material_defaults),
       callback = col_reorder_callback(
         "mattbl_col_order", names(mattbl_data())
       )

@@ -48,5 +48,14 @@ reorder_export_columns <- function(data, col_state) {
     return(data)
   }
 
+  # Visibility is indexed by current position, matching the reordered columns.
+  if (!is.null(col_state$visible)) {
+    visible <- unlist(col_state$visible, use.names = FALSE)
+    if (!is.logical(visible) || length(visible) != ncol(data) || anyNA(visible)) {
+      return(data)
+    }
+    order <- order[visible]
+  }
+
   data[, order + 1L, drop = FALSE]
 }
